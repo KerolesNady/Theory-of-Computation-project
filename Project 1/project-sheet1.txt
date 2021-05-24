@@ -1,0 +1,42 @@
+import re
+import string
+
+def traverse(tree):
+    retval = ''
+    for node in tree:
+        if node[0] == 'any':
+            retval += 'x'
+        elif node[0] == 'at':
+            pass
+        elif node[0] in ['min_repeat', 'max_repeat']:
+            retval += traverse(node[1][2]) * node[1][0]
+        elif node[0] == 'in':
+            if node[1][0][0] == 'negate':
+                letters = list(string.ascii_letters)
+                for part in node[1][1:]:
+                    if part[0] == 'literal':
+                        letters.remove(chr(part[1]))
+                    else:
+                        for letter in range(part[1][0], part[1][1]+1):
+                            letters.remove(chr(letter))
+                retval += letters[0]
+            else:
+                if node[1][0][0] == 'range':
+                    retval += chr(node[1][0][1][0])
+                else:
+                    retval += chr(node[1][0][1])
+        elif node[0] == 'not_literal':
+            if node[1] == 120:
+                retval += 'y'
+            else:
+                retval += 'x'
+        elif node[0] == 'branch':
+            retval += traverse(node[1][1][0])
+        elif node[0] == 'subpattern':
+            retval += traverse(node[1][1])
+        elif node[0] == 'literal':
+            retval += chr(node[1])
+    return retval
+
+print traverse(re.sre_parse.parse(regex).data)
+
